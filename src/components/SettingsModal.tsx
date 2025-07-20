@@ -5,6 +5,7 @@ import { database } from '../lib/database';
 import { auth } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import PaymentModal from './PaymentModal';
+import { CurrencyManager, SUPPORTED_CURRENCIES } from '../lib/currency';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user }) 
     emailUpdates: true,
     autoSave: true,
     language: 'en',
-    currency: 'USD',
+    currency: CurrencyManager.getUserCurrency(),
     timezone: 'UTC'
   });
   const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
@@ -148,6 +149,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user }) 
   ];
 
   const handleSave = async () => {
+    // Update currency preference
+    CurrencyManager.setUserCurrency(settings.currency);
+    
     localStorage.setItem('userSettings', JSON.stringify(settings));
     
     // Update user profile in database
@@ -477,8 +481,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user }) 
                 onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               >
-                <option value="USD">USD ($)</option>
+                {Object.values(SUPPORTED_CURRENCIES).map(currency => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.code} ({currency.symbol}) - {currency.name}
+                  </option>
+                ))}
               </select>
+              <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                Display currency for dashboard. Payments are processed in USD.
+              </p>
             </div>
             <div className="flex items-center justify-between">
               <div>

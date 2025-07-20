@@ -411,6 +411,38 @@ export const database = {
     }
   },
 
+  async deleteTask(id: string) {
+    if (isDemoMode) {
+      const index = demoData.tasks.findIndex(task => task.id === id)
+      if (index !== -1) {
+        demoData.tasks.splice(index, 1)
+        return { data: { id }, error: null }
+      }
+      return { data: null, error: 'Task not found' }
+    }
+    
+    try {
+      console.log('🗑️ Deleting task:', id)
+      const { data, error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id)
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('❌ Delete task error:', error)
+        return { data: null, error }
+      }
+      
+      console.log('✅ Task deleted successfully:', data)
+      return { data, error: null }
+    } catch (error) {
+      console.error('❌ Delete task error:', error)
+      return { data: null, error }
+    }
+  },
+
   // Business Portfolios
   async getPortfolio(userId: string) {
     if (isDemoMode) {
@@ -439,13 +471,42 @@ export const database = {
     }
   },
 
+  async getPortfolioBySlug(slug: string) {
+    if (isDemoMode) {
+      const portfolio = demoData.portfolios.find(p => p.slug === slug)
+      return { data: portfolio, error: null }
+    }
+    
+    try {
+      console.log('🌐 Fetching portfolio by slug:', slug)
+      const { data, error } = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_public', true)
+        .single()
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('❌ Get portfolio by slug error:', error)
+        return { data: null, error }
+      }
+      
+      console.log('✅ Portfolio by slug fetched:', data ? 'Found' : 'Not found')
+      return { data, error: null }
+    } catch (error) {
+      console.error('❌ Get portfolio by slug error:', error)
+      return { data: null, error }
+    }
+  },
+
   async createOrUpdatePortfolio(portfolioData: any) {
     if (isDemoMode) {
       const existingIndex = demoData.portfolios.findIndex(p => p.user_id === portfolioData.user_id)
       const portfolio = {
         ...portfolioData,
         id: existingIndex >= 0 ? demoData.portfolios[existingIndex].id : Date.now().toString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        unique_id: portfolioData.unique_id || `portfolio-${portfolioData.user_id || 'demo'}-${Date.now()}`
       }
       
       if (existingIndex >= 0) {
@@ -468,7 +529,8 @@ export const database = {
       const portfolio = {
         ...portfolioData,
         user_id: user.id,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        unique_id: portfolioData.unique_id || `portfolio-${user.id}-${Date.now()}`
       }
       
       console.log('💾 Creating/updating portfolio:', portfolio)

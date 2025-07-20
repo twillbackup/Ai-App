@@ -46,13 +46,15 @@ export const auth = {
         email,
         password,
         options: {
-          data: userData
+          data: userData,
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
       console.log('✅ Signup result:', { success: !!data.user, error: error?.message })
 
-      if (data.user && !error) {
+      // Don't create profile immediately - wait for email confirmation
+      if (data.user && !error && data.user.email_confirmed_at) {
         // Create user profile in our users table
         console.log('👤 Creating user profile in database')
         const { data: profile, error: profileError } = await supabase.from('users').insert({
@@ -124,6 +126,49 @@ export const auth = {
       return result
     } catch (error) {
       console.error('❌ Signin error:', error)
+      return { data: null, error: error as any }
+    }
+  },
+
+  async signInWithGoogle() {
+
+    try {
+      console.log('🔐 Attempting Google OAuth signin')
+      
+      if (isDemoMode || !supabase) {
+        console.log('📱 Demo mode: Simulating Google signin')
+        const googleUser = {
+          id: `google-demo-${Date.now()}`,
+          email: 'google.demo@example.com',
+          name: 'Google Demo User',
+          tier: 'free',
+          created_at: new Date().toISOString(),
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=google'
+        }
+        localStorage.setItem('demoUser', JSON.stringify(googleUser))
+        return { data: { user: googleUser }, error: null }
+      }
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        }
+      })
+
+      if (error) {
+        console.error('❌ Google OAuth error:', error)
+        return { data: null, error }
+      }
+
+      console.log('✅ Google OAuth initiated successfully')
+      return { data, error }
+    } catch (error) {
+      console.error('❌ Google signin error:', error)
       return { data: null, error: error as any }
     }
   },

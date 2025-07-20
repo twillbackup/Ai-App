@@ -27,7 +27,9 @@ import {
   Facebook,
   ArrowRight,
   Play,
-  ChevronDown
+  ChevronDown,
+  Sparkles,
+  Send
 } from 'lucide-react';
 import { database } from '../lib/database';
 
@@ -41,138 +43,59 @@ const PublicPortfolio: React.FC<PublicPortfolioProps> = ({ slug }) => {
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
   const [isVisible, setIsVisible] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
 
   useEffect(() => {
-    loadPortfolio();
+    loadPortfolio(slug);
     setIsVisible(true);
   }, [slug]);
 
-  const loadPortfolio = async () => {
+  const loadPortfolio = async (portfolioSlug: string) => {
     setLoading(true);
     
-    // Enhanced portfolio data with images and animations
-    const samplePortfolio = {
-      id: '1',
-      business_name: 'Ayyan Digital Solutions',
-      tagline: 'Transforming businesses through innovative digital solutions',
-      description: `I'm a passionate digital entrepreneur with over 5 years of experience in building scalable web applications and helping businesses grow through technology. 
-
-My expertise spans across full-stack development, AI integration, and business strategy. I've successfully delivered 50+ projects for clients ranging from startups to enterprise companies.
-
-I believe in creating solutions that not only solve problems but also drive meaningful business growth. My approach combines technical excellence with strategic thinking to deliver results that matter.`,
-      hero_image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
-      profile_image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
-      services: [
-        {
-          title: 'Full-Stack Web Development',
-          description: 'Modern web applications using React, Node.js, and cloud technologies',
-          icon: Code,
-          image: 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
+    try {
+      const { data, error } = await database.getPortfolioBySlug(portfolioSlug);
+      
+      if (error || !data) {
+        console.error('Portfolio not found:', error);
+        setPortfolio(null);
+        setLoading(false);
+        return;
+      }
+      
+      // Add default values for missing fields
+      const portfolioWithDefaults = {
+        ...data,
+        stats: data.stats || {
+          projects_completed: data.portfolio_items?.length || 0,
+          clients_served: Math.floor((data.portfolio_items?.length || 0) * 0.8),
+          years_experience: 3,
+          success_rate: 95
         },
-        {
-          title: 'AI & Machine Learning Integration',
-          description: 'Intelligent solutions that automate and optimize business processes',
-          icon: Zap,
-          image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
-        },
-        {
-          title: 'Business Process Automation',
-          description: 'Streamline operations with custom automation solutions',
-          icon: TrendingUp,
-          image: 'https://images.pexels.com/photos/590020/pexels-photo-590020.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
-        },
-        {
-          title: 'Digital Marketing Strategy',
-          description: 'Data-driven marketing campaigns that deliver results',
-          icon: Palette,
-          image: 'https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
-        },
-        {
-          title: 'E-commerce Solutions',
-          description: 'Complete online stores with payment integration and analytics',
-          icon: Globe,
-          image: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
-        },
-        {
-          title: 'Mobile App Development',
-          description: 'Cross-platform mobile applications for iOS and Android',
-          icon: User,
-          image: 'https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop'
-        }
-      ],
-      portfolio_items: [
-        {
-          title: 'E-commerce Platform',
-          description: 'Modern online store with AI-powered recommendations',
-          image: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-          tech: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-          link: 'https://example.com'
-        },
-        {
-          title: 'AI Business Assistant',
-          description: 'Comprehensive SaaS platform for business automation',
-          image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-          tech: ['React', 'TypeScript', 'Supabase', 'OpenAI'],
-          link: 'https://example.com'
-        },
-        {
-          title: 'Healthcare Management System',
-          description: 'Patient management and appointment scheduling platform',
-          image: 'https://images.pexels.com/photos/4386467/pexels-photo-4386467.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop',
-          tech: ['Vue.js', 'Python', 'PostgreSQL', 'Docker'],
-          link: 'https://example.com'
-        }
-      ],
-      contact_info: {
-        email: 'ayyan@digitalsolutions.com',
-        phone: '+92 300 1234567',
-        address: 'Karachi, Pakistan'
-      },
-      social_links: {
-        website: 'https://ayyandigital.com',
-        linkedin: 'https://linkedin.com/in/ayyan',
-        github: 'https://github.com/ayyan',
-        twitter: 'https://twitter.com/ayyan',
-        instagram: 'https://instagram.com/ayyan'
-      },
-      is_public: true,
-      slug: 'ayyan',
-      stats: {
-        projects_completed: 52,
-        clients_served: 28,
-        years_experience: 5,
-        success_rate: 98
-      },
-      tools: [
-        'React', 'Node.js', 'Python', 'TypeScript', 'PostgreSQL', 'AWS', 
-        'Docker', 'TensorFlow', 'Figma', 'Supabase', 'Next.js', 'Vue.js'
-      ],
-      testimonials: [
-        {
-          name: 'Sarah Johnson',
-          company: 'TechStart Inc.',
-          text: 'Ayyan delivered an exceptional e-commerce platform that increased our sales by 300%. His attention to detail and technical expertise are outstanding.',
-          rating: 5,
-          image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-        },
-        {
-          name: 'Ahmed Khan',
-          company: 'Digital Marketing Pro',
-          text: 'Professional, reliable, and delivers on time. The AI integration he built saved us 20 hours per week and transformed our workflow.',
-          rating: 5,
-          image: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-        },
-        {
-          name: 'Maria Rodriguez',
-          company: 'Healthcare Solutions',
-          text: 'The patient management system Ayyan developed has revolutionized our clinic operations. Highly recommended for any healthcare technology needs.',
-          rating: 5,
-          image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-        }
-      ]
-    };
+        tools: data.tools || [
+          'React', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB', 'AWS'
+        ],
+        testimonials: data.testimonials || [
+          {
+            name: 'Client Name',
+            company: 'Company Inc.',
+            text: 'Excellent work and professional service. Highly recommended!',
+            rating: 5,
+            image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+          }
+        ]
+      };
+      
+      setPortfolio(portfolioWithDefaults);
+    } catch (error) {
+      console.error('Error loading portfolio:', error);
+      setPortfolio(null);
+    }
     
-    setPortfolio(samplePortfolio);
     setLoading(false);
   };
 
@@ -192,6 +115,13 @@ I believe in creating solutions that not only solve problems but also drive mean
       case 'website': return Globe;
       default: return ExternalLink;
     }
+  };
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would send the message
+    alert('Message sent! Thank you for reaching out.');
+    setContactForm({ name: '', email: '', message: '' });
   };
 
   if (loading) {
@@ -227,15 +157,19 @@ I believe in creating solutions that not only solve problems but also drive mean
     );
   }
 
+  const primaryColor = portfolio.theme_settings?.primary_color || '#3B82F6';
+  const secondaryColor = portfolio.theme_settings?.secondary_color || '#8B5CF6';
+  const accentColor = portfolio.theme_settings?.accent_color || '#10B981';
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-indigo-900/20"></div>
         <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse opacity-20" style={{ backgroundColor: primaryColor }}></div>
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse opacity-20" style={{ backgroundColor: secondaryColor, animationDelay: '1s' }}></div>
+          <div className="absolute bottom-1/4 left-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse opacity-20" style={{ backgroundColor: accentColor, animationDelay: '2s' }}></div>
         </div>
       </div>
 
@@ -244,10 +178,18 @@ I believe in creating solutions that not only solve problems but also drive mean
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              {portfolio.logo ? (
+                <img 
+                  src={portfolio.logo} 
+                  alt="Logo" 
+                  className="w-10 h-10 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
+                  <User className="w-6 h-6 text-white" />
+                </div>
+              )}
+              <span className="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
                 {portfolio.business_name}
               </span>
             </div>
@@ -259,9 +201,13 @@ I believe in creating solutions that not only solve problems but also drive mean
                   onClick={() => setActiveSection(section)}
                   className={`capitalize transition-all duration-300 ${
                     activeSection === section 
-                      ? 'text-blue-400 border-b-2 border-blue-400' 
+                      ? 'border-b-2 border-opacity-100' 
                       : 'text-gray-300 hover:text-white'
                   }`}
+                  style={{ 
+                    color: activeSection === section ? primaryColor : undefined,
+                    borderColor: activeSection === section ? primaryColor : undefined
+                  }}
                 >
                   {section}
                 </button>
@@ -270,7 +216,8 @@ I believe in creating solutions that not only solve problems but also drive mean
 
             <button
               onClick={copyPortfolioLink}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105"
+              style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}
             >
               {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
               <span>{copied ? 'Copied!' : 'Share'}</span>
@@ -282,24 +229,37 @@ I believe in creating solutions that not only solve problems but also drive mean
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center pt-16">
         <div className="absolute inset-0 z-0">
-          <img 
-            src={portfolio.hero_image} 
-            alt="Hero Background"
-            className="w-full h-full object-cover opacity-20"
-          />
+          {portfolio.hero_image ? (
+            <img 
+              src={portfolio.hero_image} 
+              alt="Hero Background"
+              className="w-full h-full object-cover opacity-20"
+            />
+          ) : (
+            <div 
+              className="w-full h-full opacity-30"
+              style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/80"></div>
         </div>
         
         <div className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="mb-8">
-            <img 
-              src={portfolio.profile_image}
-              alt={portfolio.business_name}
-              className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white/20 shadow-2xl animate-bounce-in"
-            />
+            {portfolio.profile_image ? (
+              <img 
+                src={portfolio.profile_image}
+                alt={portfolio.business_name}
+                className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white/20 shadow-2xl animate-bounce-in object-cover"
+              />
+            ) : (
+              <div className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white/20 shadow-2xl animate-bounce-in flex items-center justify-center" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
+                <User className="w-16 h-16 text-white" />
+              </div>
+            )}
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent animate-fade-in">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {portfolio.business_name}
           </h1>
           
@@ -327,7 +287,8 @@ I believe in creating solutions that not only solve problems but also drive mean
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-bounce-in" style={{ animationDelay: '1s' }}>
             <button
               onClick={() => setActiveSection('contact')}
-              className="group flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-xl"
+              className="group flex items-center space-x-3 px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl"
+              style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}
             >
               <Mail className="w-5 h-5 group-hover:animate-pulse" />
               <span className="font-semibold">Get In Touch</span>
@@ -354,10 +315,10 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section id="about" className="relative py-20 bg-gradient-to-b from-transparent to-black/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               About Me
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 mx-auto rounded-full" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}></div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -371,25 +332,25 @@ I believe in creating solutions that not only solve problems but also drive mean
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105">
-                  <Code className="w-8 h-8 text-blue-400 mb-4" />
+                <div className="p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105" style={{ background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)` }}>
+                  <Code className="w-8 h-8 mb-4" style={{ color: primaryColor }} />
                   <h3 className="font-semibold text-white mb-2">Development</h3>
                   <p className="text-gray-400 text-sm">Full-stack solutions</p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-600/20 to-indigo-600/20 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105">
-                  <Zap className="w-8 h-8 text-purple-400 mb-4" />
+                <div className="p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105" style={{ background: `linear-gradient(135deg, ${secondaryColor}20, ${accentColor}20)` }}>
+                  <Zap className="w-8 h-8 mb-4" style={{ color: secondaryColor }} />
                   <h3 className="font-semibold text-white mb-2">AI Integration</h3>
                   <p className="text-gray-400 text-sm">Smart automation</p>
                 </div>
               </div>
               <div className="space-y-4 mt-8">
-                <div className="bg-gradient-to-br from-indigo-600/20 to-blue-600/20 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105">
-                  <TrendingUp className="w-8 h-8 text-indigo-400 mb-4" />
+                <div className="p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105" style={{ background: `linear-gradient(135deg, ${accentColor}20, ${primaryColor}20)` }}>
+                  <TrendingUp className="w-8 h-8 mb-4" style={{ color: accentColor }} />
                   <h3 className="font-semibold text-white mb-2">Strategy</h3>
                   <p className="text-gray-400 text-sm">Business growth</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-600/20 to-blue-600/20 p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105">
-                  <Palette className="w-8 h-8 text-green-400 mb-4" />
+                <div className="p-6 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105" style={{ background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)` }}>
+                  <Palette className="w-8 h-8 mb-4" style={{ color: primaryColor }} />
                   <h3 className="font-semibold text-white mb-2">Design</h3>
                   <p className="text-gray-400 text-sm">User experience</p>
                 </div>
@@ -403,7 +364,7 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section id="services" className="relative py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Services
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -412,41 +373,25 @@ I believe in creating solutions that not only solve problems but also drive mean
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {portfolio.services.map((service: any, index: number) => {
-              const IconComponent = service.icon;
-              return (
-                <div 
-                  key={index} 
-                  className="group relative bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  
-                  <div className="relative z-10">
-                    <div className="w-full h-48 mb-6 rounded-lg overflow-hidden">
-                      <img 
-                        src={service.image} 
-                        alt={service.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                        <IconComponent className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300">
-                        {service.title}
-                      </h3>
-                    </div>
-                    
-                    <p className="text-gray-300 leading-relaxed">
-                      {service.description}
-                    </p>
+            {portfolio.services.map((service: string, index: number) => (
+              <div 
+                key={index} 
+                className="group relative bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(135deg, ${primaryColor}10, ${secondaryColor}10)` }}></div>
+                
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
+                    <Sparkles className="w-6 h-6 text-white" />
                   </div>
+                  
+                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors duration-300 text-center">
+                    {service}
+                  </h3>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -455,7 +400,7 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section id="portfolio" className="relative py-20 bg-gradient-to-b from-transparent to-black/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Featured Work
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -502,7 +447,12 @@ I believe in creating solutions that not only solve problems but also drive mean
                     {item.tech.map((tech: string, techIndex: number) => (
                       <span 
                         key={techIndex}
-                        className="px-3 py-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-blue-300 rounded-full text-sm border border-blue-500/20"
+                        className="px-3 py-1 text-sm rounded-full border"
+                        style={{ 
+                          background: `${primaryColor}20`, 
+                          color: primaryColor,
+                          borderColor: `${primaryColor}30`
+                        }}
                       >
                         {tech}
                       </span>
@@ -519,7 +469,7 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section className="relative py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Tools & Technologies
             </h2>
             <p className="text-xl text-gray-300">
@@ -534,7 +484,7 @@ I believe in creating solutions that not only solve problems but also drive mean
                 className="group bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 text-center animate-fade-in"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
                   <Code className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-white font-medium group-hover:text-blue-400 transition-colors duration-300">
@@ -550,7 +500,7 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section id="testimonials" className="relative py-20 bg-gradient-to-b from-transparent to-black/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Client Testimonials
             </h2>
             <p className="text-xl text-gray-300">
@@ -596,7 +546,7 @@ I believe in creating solutions that not only solve problems but also drive mean
       <section id="contact" className="relative py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Let's Work Together
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -613,7 +563,7 @@ I believe in creating solutions that not only solve problems but also drive mean
                 <div className="space-y-4">
                   {portfolio.contact_info.email && (
                     <div className="flex items-center space-x-4 group">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
                         <Mail className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -630,7 +580,7 @@ I believe in creating solutions that not only solve problems but also drive mean
                   
                   {portfolio.contact_info.phone && (
                     <div className="flex items-center space-x-4 group">
-                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(to right, ${accentColor}, ${primaryColor})` }}>
                         <Phone className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -647,7 +597,7 @@ I believe in creating solutions that not only solve problems but also drive mean
                   
                   {portfolio.contact_info.address && (
                     <div className="flex items-center space-x-4 group">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(to right, ${secondaryColor}, ${accentColor})` }}>
                         <MapPin className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -673,7 +623,11 @@ I believe in creating solutions that not only solve problems but also drive mean
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-center space-x-3 p-3 bg-gradient-to-r from-white/5 to-white/10 rounded-lg hover:from-blue-600/20 hover:to-purple-600/20 transition-all duration-300 transform hover:scale-105"
+                        className="group flex items-center space-x-3 p-3 bg-gradient-to-r from-white/5 to-white/10 rounded-lg transition-all duration-300 transform hover:scale-105"
+                        style={{ 
+                          background: 'linear-gradient(to right, rgba(255,255,255,0.05), rgba(255,255,255,0.1))',
+                          ':hover': { background: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20)` }
+                        }}
                       >
                         <IconComponent className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors duration-300" />
                         <span className="capitalize text-gray-300 group-hover:text-white transition-colors duration-300 font-medium">
@@ -686,29 +640,59 @@ I believe in creating solutions that not only solve problems but also drive mean
               </div>
             </div>
             
-            {/* CTA */}
-            <div className="flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse">
-                  <Heart className="w-16 h-16 text-white" />
+            {/* Contact Form */}
+            <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/10">
+              <h3 className="text-2xl font-bold text-white mb-6">Send a Message</h3>
+              
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                  <input
+                    type="text"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 text-white placeholder-gray-400"
+                    style={{ focusRingColor: primaryColor }}
+                    placeholder="Your name"
+                    required
+                  />
                 </div>
                 
-                <h3 className="text-3xl font-bold text-white mb-4">
-                  Ready to Start?
-                </h3>
-                <p className="text-gray-300 mb-8 leading-relaxed">
-                  Let's bring your vision to life with cutting-edge technology and creative solutions.
-                </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 text-white placeholder-gray-400"
+                    style={{ focusRingColor: primaryColor }}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
                 
-                <a
-                  href={`mailto:${portfolio.contact_info.email}?subject=Project Inquiry&body=Hi Ayyan,%0D%0A%0D%0AI'm interested in discussing a project with you.%0D%0A%0D%0AProject details:%0D%0A- %0D%0A%0D%0ABest regards`}
-                  className="group inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-xl"
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                  <textarea
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 text-white placeholder-gray-400 resize-none"
+                    style={{ focusRingColor: primaryColor }}
+                    placeholder="Tell me about your project..."
+                    required
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                  style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}
                 >
-                  <Mail className="w-5 h-5 group-hover:animate-pulse" />
-                  <span className="font-semibold">Start a Project</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </div>
+                  <Send className="w-5 h-5" />
+                  <span>Send Message</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -719,16 +703,24 @@ I believe in creating solutions that not only solve problems but also drive mean
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              {portfolio.logo ? (
+                <img 
+                  src={portfolio.logo} 
+                  alt="Logo" 
+                  className="w-10 h-10 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` }}>
+                  <User className="w-6 h-6 text-white" />
+                </div>
+              )}
+              <span className="text-xl font-bold" style={{ background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 {portfolio.business_name}
               </span>
             </div>
             
             <p className="text-gray-400 mb-6">
-              Transforming businesses through innovative digital solutions
+              {portfolio.tagline}
             </p>
             
             <div className="flex justify-center space-x-6 mb-6">

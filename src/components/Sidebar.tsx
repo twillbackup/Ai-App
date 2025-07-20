@@ -20,7 +20,8 @@ import {
   Sun,
   Menu,
   X,
-  Shield
+  Shield,
+  CheckSquare
 } from 'lucide-react';
 import { TierManager, TIERS } from '../lib/tiers';
 import { useTheme } from '../contexts/ThemeContext';
@@ -59,6 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'operations', label: 'Operations', icon: BarChart3 },
     { id: 'portfolio', label: 'Portfolio', icon: Globe },
     { id: 'crm', label: 'CRM & Leads', icon: Users },
+    { id: 'todos', label: 'Todo List', icon: CheckSquare },
   ];
 
   // Super admin accounts that can access admin panel

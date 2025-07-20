@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { database } from '../lib/database';
 import UsageDashboard from './UsageDashboard';
+import { CurrencyManager } from '../lib/currency';
 
 interface DashboardProps {
   setActiveSection: (section: string) => void;
@@ -46,10 +47,14 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection, user }) => {
       if (statsResult.data) {
         const data = statsResult.data;
         console.log('📊 Dashboard stats:', data);
+        
+        // Format revenue in user's preferred currency
+        const formattedRevenue = CurrencyManager.formatAmount(data.revenue);
+        
         setStats([
           { 
             label: 'Monthly Revenue', 
-            value: `$${data.revenue.toLocaleString()}`, 
+            value: formattedRevenue, 
             change: '+12%', 
             icon: DollarSign, 
             color: 'text-green-600' 
@@ -82,7 +87,8 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection, user }) => {
       const [invoicesResult, campaignsResult, tasksResult] = await Promise.all([
         database.getInvoices(),
         database.getCampaigns(),
-        database.getTasks()
+        database.getTasks(),
+        database.getPortfolio(user?.id || '')
       ]);
 
       const activities = [];
@@ -117,6 +123,21 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection, user }) => {
         });
       }
 
+      // Add portfolio activity if exists
+      const [, , , portfolioResult] = await Promise.all([
+        Promise.resolve(),
+        Promise.resolve(),
+        Promise.resolve(),
+        database.getPortfolio(user?.id || '')
+      ]);
+      
+      if (portfolioResult.data && portfolioResult.data.is_public) {
+        activities.push({
+          type: 'Portfolio',
+          action: `Portfolio published at /portfolio/${portfolioResult.data.slug}`,
+          time: new Date(portfolioResult.data.updated_at || portfolioResult.data.created_at).toLocaleDateString()
+        });
+      }
       setRecentActivity(activities.slice(0, 4));
     } catch (error) {
       console.error('Dashboard data loading error:', error);

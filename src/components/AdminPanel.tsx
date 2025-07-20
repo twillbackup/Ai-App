@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { database } from '../lib/database';
 import { dbFunctions } from '../lib/supabase';
+import { CurrencyManager } from '../lib/currency';
 
 const AdminPanel: React.FC = () => {
   // Check if user is super admin
@@ -209,7 +210,7 @@ const AdminPanel: React.FC = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                ${stats.totalRevenue.toLocaleString()}
+                {CurrencyManager.formatAmount(stats.totalRevenue)}
               </p>
               <p className="text-sm text-slate-600 dark:text-gray-400">Total Revenue</p>
             </div>
@@ -380,7 +381,7 @@ const AdminPanel: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-4 px-4 font-semibold text-slate-800 dark:text-white">
-                        ${payment.amount}
+                        {CurrencyManager.formatAmount(payment.amount)}
                       </td>
                       <td className="py-4 px-4">
                         <span className={`px-2 py-1 text-xs rounded-full capitalize ${getTierColor(payment.tier)}`}>
