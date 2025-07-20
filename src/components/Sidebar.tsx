@@ -21,7 +21,8 @@ import {
   Menu,
   X,
   Shield,
-  CheckSquare
+  CheckSquare,
+  Palette
 } from 'lucide-react';
 import { TierManager, TIERS } from '../lib/tiers';
 import { useTheme } from '../contexts/ThemeContext';

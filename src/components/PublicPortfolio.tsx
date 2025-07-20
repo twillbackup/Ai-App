@@ -70,24 +70,7 @@ const PublicPortfolio: React.FC<PublicPortfolioProps> = ({ slug }) => {
       // Add default values for missing fields
       const portfolioWithDefaults = {
         ...data,
-        stats: data.stats || {
-          projects_completed: data.portfolio_items?.length || 0,
-          clients_served: Math.floor((data.portfolio_items?.length || 0) * 0.8),
-          years_experience: 3,
-          success_rate: 95
-        },
-        tools: data.tools || [
-          'React', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB', 'AWS'
-        ],
-        testimonials: data.testimonials || [
-          {
-            name: 'Client Name',
-            company: 'Company Inc.',
-            text: 'Excellent work and professional service. Highly recommended!',
-            rating: 5,
-            image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-          }
-        ]
+        // Data is now enhanced in the database layer
       };
       
       setPortfolio(portfolioWithDefaults);

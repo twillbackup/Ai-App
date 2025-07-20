@@ -215,9 +215,10 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
     };
 
     const generateUniqueLink = () => {
-        const uniqueId = `portfolio-${user.id}-${Date.now()}`;
-        setPortfolio(prev => ({ ...prev, unique_id: uniqueId }));
-        return `${window.location.origin}/portfolio/${portfolio.slug}?id=${uniqueId}`;
+        const uniqueId = `${user.id}-${Date.now()}`;
+        const newSlug = `${portfolio.business_name.toLowerCase().replace(/\s+/g, '-')}-${uniqueId}`;
+        setPortfolio(prev => ({ ...prev, slug: newSlug, unique_id: uniqueId }));
+        return `${window.location.origin}/portfolio/${newSlug}`;
     };
 
     const tabs = [
@@ -828,6 +829,9 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                                     {window.location.origin}/portfolio/{portfolio.slug}
                                 </code>
                             </div>
+                            <p className="text-xs text-green-600 dark:text-green-400 mb-3">
+                                This is your unique portfolio URL linked to your account. All your portfolio data will be displayed dynamically.
+                            </p>
                             <div className="flex flex-wrap gap-2 text-xs text-green-600 dark:text-green-400">
                                 <span className="flex items-center space-x-1">
                                     <span>✨</span>
@@ -844,6 +848,10 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                                 <span className="flex items-center space-x-1">
                                     <span>🎨</span>
                                     <span>Custom Branding</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                    <span>🔗</span>
+                                    <span>Unique User Link</span>
                                 </span>
                             </div>
                         </div>

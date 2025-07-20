@@ -474,7 +474,37 @@ export const database = {
   async getPortfolioBySlug(slug: string) {
     if (isDemoMode) {
       const portfolio = demoData.portfolios.find(p => p.slug === slug)
-      return { data: portfolio, error: null }
+      if (portfolio) {
+        // Add dynamic data for demo
+        const enhancedPortfolio = {
+          ...portfolio,
+          stats: {
+            projects_completed: portfolio.portfolio_items?.length || 3,
+            clients_served: Math.floor((portfolio.portfolio_items?.length || 3) * 0.8) + 5,
+            years_experience: 3,
+            success_rate: 95
+          },
+          tools: portfolio.tools || ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB', 'AWS'],
+          testimonials: portfolio.testimonials || [
+            {
+              name: 'Sarah Johnson',
+              company: 'Tech Startup Inc.',
+              text: 'Excellent work and professional service. Highly recommended!',
+              rating: 5,
+              image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+            },
+            {
+              name: 'Mike Chen',
+              company: 'Digital Solutions Ltd.',
+              text: 'Outstanding results and great communication throughout the project.',
+              rating: 5,
+              image: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+            }
+          ]
+        }
+        return { data: enhancedPortfolio, error: null }
+      }
+      return { data: null, error: 'Portfolio not found' }
     }
     
     try {
@@ -489,6 +519,31 @@ export const database = {
       if (error && error.code !== 'PGRST116') {
         console.error('❌ Get portfolio by slug error:', error)
         return { data: null, error }
+      }
+      
+      if (data) {
+        // Enhance with dynamic data
+        const enhancedData = {
+          ...data,
+          stats: data.stats || {
+            projects_completed: data.portfolio_items?.length || 0,
+            clients_served: Math.floor((data.portfolio_items?.length || 0) * 0.8),
+            years_experience: 3,
+            success_rate: 95
+          },
+          tools: data.tools || ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB', 'AWS'],
+          testimonials: data.testimonials || [
+            {
+              name: 'Client Name',
+              company: 'Company Inc.',
+              text: 'Excellent work and professional service. Highly recommended!',
+              rating: 5,
+              image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
+            }
+          ]
+        }
+        console.log('✅ Portfolio by slug fetched with enhancements')
+        return { data: enhancedData, error: null }
       }
       
       console.log('✅ Portfolio by slug fetched:', data ? 'Found' : 'Not found')
