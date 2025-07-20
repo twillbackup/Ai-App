@@ -17,6 +17,7 @@ import AccountingTools from './components/AccountingTools';
 import AdminPanel from './components/AdminPanel';
 import PublicPortfolio from './components/PublicPortfolio';
 import TodoList from './components/TodoList';
+import BrandKitGenerator from './components/BrandKitGenerator';
 import { database } from './lib/database';
 import { emailService, auth, isDemoMode } from './lib/supabase';
 import { Menu } from 'lucide-react';
@@ -170,6 +171,8 @@ function App() {
         return <AdminPanel />;
       case 'todos':
         return <TodoList />;
+      case 'brand-kit':
+        return <BrandKitGenerator />;
       default:
         return <Dashboard setActiveSection={setActiveSection} user={user} />;
     }

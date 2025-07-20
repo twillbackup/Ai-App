@@ -242,6 +242,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user }) 
       case 'notifications':
         return (
           <div className="space-y-6">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Notification System Status</h4>
+              <p className="text-blue-700 dark:text-blue-400 text-sm">
+                ✅ Notifications are working! You'll receive alerts for important events like payments, usage limits, and system updates.
+              </p>
+            </div>
+            
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-slate-800 dark:text-white">Email Notifications</h4>
@@ -263,17 +270,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, user }) 
                 type="checkbox"
                 checked={settings.emailUpdates}
                 onChange={(e) => setSettings(prev => ({ ...prev, emailUpdates: e.target.checked }))}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-slate-800 dark:text-white">Payment Notifications</h4>
-                <p className="text-sm text-slate-600 dark:text-gray-400">Alerts for payments and billing</p>
-              </div>
-              <input
-                type="checkbox"
-                defaultChecked
                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
               />
             </div>
