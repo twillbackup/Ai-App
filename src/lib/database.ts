@@ -473,9 +473,75 @@ export const database = {
 
   async getPortfolioBySlug(slug: string) {
     if (isDemoMode) {
-      const portfolio = demoData.portfolios.find(p => p.slug === slug)
+      // For demo mode, create a sample portfolio if none exists
+      let portfolio = demoData.portfolios.find(p => p.slug === slug);
+      
+      if (!portfolio && slug) {
+        // Create a demo portfolio for any slug
+        portfolio = {
+          id: 'demo-portfolio',
+          user_id: 'demo-user',
+          business_name: 'Demo Business',
+          tagline: 'Innovative Solutions for Modern Challenges',
+          description: 'We are a forward-thinking company dedicated to providing cutting-edge solutions that help businesses thrive in today\'s competitive landscape. Our team of experts combines creativity with technical expertise to deliver exceptional results.',
+          slug: slug,
+          is_public: true,
+          services: [
+            'Web Development',
+            'Mobile App Development', 
+            'Digital Marketing',
+            'UI/UX Design',
+            'Business Consulting',
+            'AI Integration'
+          ],
+          portfolio_items: [
+            {
+              title: 'E-commerce Platform',
+              description: 'A modern, responsive e-commerce solution with advanced features',
+              image: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=600',
+              tech: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+              link: 'https://example.com'
+            },
+            {
+              title: 'Mobile Banking App',
+              description: 'Secure and user-friendly mobile banking application',
+              image: 'https://images.pexels.com/photos/147413/twitter-facebook-together-exchange-147413.jpeg?auto=compress&cs=tinysrgb&w=600',
+              tech: ['React Native', 'Firebase', 'TypeScript'],
+              link: 'https://example.com'
+            },
+            {
+              title: 'AI Dashboard',
+              description: 'Intelligent analytics dashboard with machine learning insights',
+              image: 'https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=600',
+              tech: ['Python', 'TensorFlow', 'React', 'D3.js'],
+              link: 'https://example.com'
+            }
+          ],
+          contact_info: {
+            email: 'hello@demobusiness.com',
+            phone: '+1 (555) 123-4567',
+            address: '123 Business Street, Tech City, TC 12345'
+          },
+          social_links: {
+            website: 'https://demobusiness.com',
+            linkedin: 'https://linkedin.com/company/demobusiness',
+            twitter: 'https://twitter.com/demobusiness',
+            github: 'https://github.com/demobusiness'
+          },
+          theme_settings: {
+            primary_color: '#3B82F6',
+            secondary_color: '#8B5CF6',
+            accent_color: '#10B981'
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        // Add to demo data
+        demoData.portfolios.push(portfolio);
+      }
+      
       if (portfolio) {
-        // Add dynamic data for demo
         const enhancedPortfolio = {
           ...portfolio,
           stats: {

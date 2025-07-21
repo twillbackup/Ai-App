@@ -58,24 +58,21 @@ const PublicPortfolio: React.FC<PublicPortfolioProps> = ({ slug }) => {
     setLoading(true);
     
     try {
+      console.log('🔍 Loading portfolio with slug:', portfolioSlug);
       const { data, error } = await database.getPortfolioBySlug(portfolioSlug);
       
       if (error || !data) {
-        console.error('Portfolio not found:', error);
+        console.error('❌ Portfolio not found:', error);
         setPortfolio(null);
         setLoading(false);
         return;
       }
       
-      // Add default values for missing fields
-      const portfolioWithDefaults = {
-        ...data,
-        // Data is now enhanced in the database layer
-      };
+      console.log('✅ Portfolio loaded successfully:', data);
       
-      setPortfolio(portfolioWithDefaults);
+      setPortfolio(data);
     } catch (error) {
-      console.error('Error loading portfolio:', error);
+      console.error('❌ Error loading portfolio:', error);
       setPortfolio(null);
     }
     
@@ -128,13 +125,19 @@ const PublicPortfolio: React.FC<PublicPortfolioProps> = ({ slug }) => {
 
   if (!portfolio) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-900 via-pink-900 to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User className="w-12 h-12 text-red-400" />
+          <div className="w-24 h-24 bg-slate-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User className="w-12 h-12 text-slate-400" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Portfolio Not Found</h1>
-          <p className="text-red-200">The portfolio you're looking for doesn't exist or is not public.</p>
+          <p className="text-slate-300 mb-6">The portfolio you're looking for doesn't exist or is not public.</p>
+          <a 
+            href="/"
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <span>Go to Homepage</span>
+          </a>
         </div>
       </div>
     );

@@ -11,6 +11,11 @@
         // This is an OAuth callback, redirect to dashboard
         window.location.href = '/dashboard';
       }
+      
+      // Handle portfolio routing for direct access
+      if (window.location.pathname.startsWith('/portfolio/')) {
+        console.log('Portfolio route detected:', window.location.pathname);
+      }
     </script>
   </head>
   <body>

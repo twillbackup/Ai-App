@@ -124,17 +124,12 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection, user }) => {
       }
 
       // Add portfolio activity if exists
-      const [, , , portfolioResult] = await Promise.all([
-        Promise.resolve(),
-        Promise.resolve(),
-        Promise.resolve(),
-        database.getPortfolio(user?.id || '')
-      ]);
+      const portfolioResult = await database.getPortfolio(user?.id || '');
       
       if (portfolioResult.data && portfolioResult.data.is_public) {
         activities.push({
           type: 'Portfolio',
-          action: `Portfolio published at /portfolio/${portfolioResult.data.slug}`,
+          action: `Portfolio published`,
           time: new Date(portfolioResult.data.updated_at || portfolioResult.data.created_at).toLocaleDateString()
         });
       }

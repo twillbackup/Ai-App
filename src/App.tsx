@@ -41,17 +41,6 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if this is a portfolio route
-    const path = window.location.pathname;
-    if (path.startsWith('/portfolio/')) {
-      const slug = path.split('/portfolio/')[1];
-      if (slug && slug.trim()) {
-      setCurrentPage('portfolio-public');
-        setLoading(false);
-      return;
-      }
-    }
-    
     // Initialize currency rates if needed
     if (CurrencyManager.shouldUpdateRates()) {
       CurrencyManager.updateExchangeRates();
@@ -68,6 +57,18 @@ function App() {
     };
   }, []);
 
+  // Handle portfolio routing
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/portfolio/')) {
+      const slug = path.split('/portfolio/')[1];
+      if (slug && slug.trim()) {
+        setCurrentPage('portfolio-public');
+        setLoading(false);
+        return;
+      }
+    }
+  }, []);
   const initializeApp = async () => {
     setLoading(true);
     

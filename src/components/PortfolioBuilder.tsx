@@ -106,9 +106,14 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
             return;
         }
 
+        if (!portfolio.business_name.trim()) {
+            alert('Please enter a business name');
+            setSaving(false);
+            return;
+        }
         const portfolioData = {
             ...portfolio,
-            slug: portfolio.slug || portfolio.business_name.toLowerCase().replace(/\s+/g, '-'),
+            slug: portfolio.slug || `${portfolio.business_name.toLowerCase().replace(/\s+/g, '-')}-${user.id}`,
             unique_id: portfolio.unique_id || `portfolio-${user.id}-${Date.now()}`
         };
 
@@ -118,7 +123,7 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
         if (!error && data) {
             setPortfolio(data);
             console.log('✅ Portfolio saved successfully:', data);
-            alert('Portfolio saved successfully!');
+            alert(`Portfolio saved successfully! ${data.is_public ? `Your portfolio is now live at: ${window.location.origin}/portfolio/${data.slug}` : 'Make it public to share with others.'}`);
         } else {
             console.error('❌ Portfolio save error:', error);
             alert(`Error saving portfolio: ${error?.message || 'Please try again.'}`);
@@ -208,6 +213,10 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
     };
 
     const copyPortfolioLink = () => {
+        if (!portfolio.slug) {
+            alert('Please save your portfolio first to generate a link');
+            return;
+        }
         const link = `${window.location.origin}/portfolio/${portfolio.slug}`;
         navigator.clipboard.writeText(link);
         setCopied(true);
@@ -215,6 +224,10 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
     };
 
     const generateUniqueLink = () => {
+        if (!user || !portfolio.business_name) {
+            alert('Please fill in business name first');
+            return '';
+        }
         const uniqueId = `${user.id}-${Date.now()}`;
         const newSlug = `${portfolio.business_name.toLowerCase().replace(/\s+/g, '-')}-${uniqueId}`;
         setPortfolio(prev => ({ ...prev, slug: newSlug, unique_id: uniqueId }));
@@ -459,6 +472,9 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                                     Portfolio URL Slug
                                 </label>
+                                <p className="text-xs text-slate-500 dark:text-gray-400 mb-2">
+                                    This will be your portfolio's web address. Save your portfolio to activate the link.
+                                </p>
                                 <div className="flex">
                                     <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 dark:border-gray-600 bg-slate-50 dark:bg-gray-600 text-slate-500 dark:text-gray-400 text-sm">
                                         {window.location.origin}/portfolio/
@@ -466,11 +482,17 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                                     <input
                                         type="text"
                                         value={portfolio.slug}
-                                        onChange={(e) => setPortfolio(prev => ({ ...prev, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
+                                        onChange={(e) => setPortfolio(prev => ({ 
+                                            ...prev, 
+                                            slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') 
+                                        }))}
                                         className="flex-1 px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="your-business-name"
+                                        placeholder={portfolio.business_name ? `${portfolio.business_name.toLowerCase().replace(/\s+/g, '-')}-${user?.id || 'user'}` : 'your-business-name'}
                                     />
                                 </div>
+                                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                                    Only lowercase letters, numbers, and hyphens allowed
+                                </p>
                             </div>
                             
                             <div className="flex items-center space-x-2">
@@ -829,9 +851,14 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                                     {window.location.origin}/portfolio/{portfolio.slug}
                                 </code>
                             </div>
-                            <p className="text-xs text-green-600 dark:text-green-400 mb-3">
-                                This is your unique portfolio URL linked to your account. All your portfolio data will be displayed dynamically.
-                            </p>
+                            <div className="mb-3">
+                                <p className="text-xs text-green-600 dark:text-green-400 mb-2">
+                                    This is your unique portfolio URL linked to your account. All your portfolio data will be displayed dynamically.
+                                </p>
+                                <p className="text-xs text-blue-600 dark:text-blue-400">
+                                    💡 Tip: Save your portfolio first, then the link will work correctly!
+                                </p>
+                            </div>
                             <div className="flex flex-wrap gap-2 text-xs text-green-600 dark:text-green-400">
                                 <span className="flex items-center space-x-1">
                                     <span>✨</span>
@@ -858,20 +885,27 @@ const PortfolioBuilder: React.FC<PortfolioBuilderProps> = ({ user }) => {
                         <div className="flex flex-col space-y-2">
                             <button
                                 onClick={copyPortfolioLink}
+                                disabled={!portfolio.slug}
                                 className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                             >
                                 {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
                                 <span>{copied ? 'Copied!' : 'Share Link'}</span>
                             </button>
                             <a
-                                href={`/portfolio/${portfolio.slug}`}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    window.open(`/portfolio/${portfolio.slug}`, '_blank');
-                                }}
+                                href={`${window.location.origin}/portfolio/${portfolio.slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors text-center ${
+                                    portfolio.slug 
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                        : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                }`}
+                                onClick={(e) => {
+                                    if (!portfolio.slug) {
+                                        e.preventDefault();
+                                        alert('Please save your portfolio first!');
+                                    }
+                                }}
                             >
                                 <Eye className="w-4 h-4" />
                                 <span>View Live</span>
