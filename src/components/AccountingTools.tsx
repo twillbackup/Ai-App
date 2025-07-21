@@ -44,7 +44,6 @@ const AccountingTools: React.FC = () => {
     { id: 'expense-tracker', name: 'Expense Tracker', icon: Calculator, description: 'Track business expenses' },
     { id: 'income-tracker', name: 'Income Tracker', icon: TrendingUp, description: 'Monitor revenue streams' },
     { id: 'financial-reports', name: 'Financial Reports', icon: FileText, description: 'Generate financial reports' },
-    { id: 'tax-calculator', name: 'Tax Calculator', icon: PieChart, description: 'Calculate tax obligations' },
   ];
 
   const expenseCategories = [
@@ -555,13 +554,6 @@ Please provide:
           {selectedTool === 'expense-tracker' && renderExpenseTracker()}
           {selectedTool === 'income-tracker' && renderIncomeTracker()}
           {selectedTool === 'financial-reports' && renderFinancialReports()}
-          
-          {selectedTool === 'tax-calculator' && (
-            <div className="text-center py-12">
-              <PieChart className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-600 dark:text-gray-400">Tax calculator coming soon...</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

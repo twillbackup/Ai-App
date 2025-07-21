@@ -21,7 +21,8 @@ import {
   Menu,
   X,
   Shield,
-  CheckSquare
+  CheckSquare,
+  Palette
 } from 'lucide-react';
 import { TierManager, TIERS } from '../lib/tiers';
 import { useTheme } from '../contexts/ThemeContext';
@@ -54,6 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'marketing', label: 'Marketing', icon: TrendingUp },
     { id: 'posts', label: 'Post Maker', icon: FileText },
+    { id: 'brand-kit', label: 'Brand Kit', icon: Palette },
     { id: 'finance', label: 'Finance', icon: DollarSign },
     { id: 'accounting', label: 'Accounting', icon: Calculator },
     { id: 'strategy', label: 'Strategy', icon: Target },
