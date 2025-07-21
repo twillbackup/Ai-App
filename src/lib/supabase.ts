@@ -47,34 +47,80 @@ export const auth = {
         password,
         options: {
           data: userData,
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       })
 
       console.log('✅ Signup result:', { success: !!data.user, error: error?.message })
 
-      // Don't create profile immediately - wait for email confirmation
-      if (data.user && !error && data.user.email_confirmed_at) {
-        // Create user profile in our users table
-        console.log('👤 Creating user profile in database')
-        const { data: profile, error: profileError } = await supabase.from('users').insert({
-          id: data.user.id,
-          email: data.user.email,
-          name: userData.name,
-          tier: 'free',
-          created_at: new Date().toISOString()
-        }).select().single()
-        
-        if (profileError) {
-          console.error('❌ Profile creation error:', profileError)
+      // Create user profile only if email is confirmed
+      if (data.user && !error) {
+        if (data.user.email_confirmed_at) {
+          // Email already confirmed (shouldn't happen with new signups)
+          console.log('👤 Creating user profile in database')
+          const { data: profile, error: profileError } = await supabase.from('users').insert({
+            id: data.user.id,
+            email: data.user.email,
+            name: userData.name,
+            tier: 'free',
+            created_at: new Date().toISOString()
+          }).select().single()
+          
+          if (profileError) {
+            console.error('❌ Profile creation error:', profileError)
+          } else {
+            console.log('✅ User profile created successfully:', profile)
+          }
         } else {
-          console.log('✅ User profile created successfully:', profile)
+          console.log('📧 Email confirmation required - profile will be created after confirmation')
         }
       }
 
       return { data, error }
     } catch (error) {
       console.error('❌ Signup error:', error)
+      return { data: null, error: error as any }
+    }
+  },
+
+  async handleEmailConfirmation(user: any) {
+    if (isDemoMode || !supabase) {
+      return { data: { user }, error: null }
+    }
+
+    try {
+      console.log('✅ Email confirmed, creating user profile...')
+      
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      if (!existingProfile) {
+        // Create user profile in our users table
+        const { data: profile, error: profileError } = await supabase.from('users').insert({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          tier: 'free',
+          created_at: new Date().toISOString()
+        }).select().single()
+        
+        if (profileError) {
+          console.error('❌ Profile creation error:', profileError)
+          return { data: null, error: profileError }
+        } else {
+          console.log('✅ User profile created successfully:', profile)
+          return { data: profile, error: null }
+        }
+      } else {
+        console.log('✅ User profile already exists:', existingProfile)
+        return { data: existingProfile, error: null }
+      }
+    } catch (error) {
+      console.error('❌ Email confirmation handling error:', error)
       return { data: null, error: error as any }
     }
   },
@@ -152,7 +198,7 @@ export const auth = {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

@@ -6,12 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Business Assistant - Your Complete Business Command Center</title>
     <script>
-      // Handle OAuth callback
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        // This is an OAuth callback, redirect to dashboard
-        window.location.href = '/dashboard';
-      }
-      
       // Handle portfolio routing for direct access
       if (window.location.pathname.startsWith('/portfolio/')) {
         console.log('Portfolio route detected:', window.location.pathname);

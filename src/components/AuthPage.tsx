@@ -135,8 +135,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onBack }) => {
         return;
       }
 
-      // For OAuth, the redirect will handle the rest
-      // The user will be redirected back to the app after authentication
+      // Show confirmation message for Google OAuth
+      setConfirmationEmail('your Google account email');
+      setShowConfirmation(true);
       
     } catch (error) {
       console.error('Google sign in error:', error);
@@ -160,8 +161,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onBack }) => {
             </h1>
             
             <p className="text-slate-600 dark:text-gray-400 mb-6">
-              We've sent a confirmation email to <strong>{confirmationEmail}</strong>. 
-              Please click the link in the email to verify your account before signing in.
+              {confirmationEmail.includes('Google') ? (
+                <>
+                  Please check your <strong>Google account email</strong> for a confirmation link. 
+                  You need to verify your email before you can access the dashboard.
+                </>
+              ) : (
+                <>
+                  We've sent a confirmation email to <strong>{confirmationEmail}</strong>. 
+                  Please click the link in the email to verify your account before signing in.
+                </>
+              )}
             </p>
             
             <div className="space-y-4">
